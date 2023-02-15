@@ -27,25 +27,38 @@ function readFile(e) {
 }
 
 const tripData = function (content) {
-	content.forEach(function (item) {
+	return content.map(function (item) {
 		const singleTripDataArray = item.substr(1, item.length - 2).split('","');
-		console.log(singleTripDataArray);
 		return singleTripDataArray;
 	});
 };
 
-const createTripElement = function (trip) {
+const createTripElement = function (tripEl) {
 	const prototypeElement = document.querySelector(
 		".excursions__item--prototype"
 	);
+
+	console.log(prototypeElement);
 	const tripElementWrapper = document.querySelector(".panel__excursions");
 
-	trip.forEach(function (item) {
+	tripEl.forEach(function (item) {
 		const tripElement = prototypeElement.cloneNode(true);
-		tripElement.classList.remove("excursions__item--prototype");
 		console.log(tripElement);
+		tripElement.classList.remove("excursions__item--prototype");
 
 		const tripTitle = document.querySelector(".excursions__title");
-		console.log(tripTitle);
+		const tripDescription = document.querySelector(".excursions__description");
+		const tripPrice = document.querySelectorAll(".excursions__price");
+
+		tripTitle.innerText = item[1];
+		tripDescription.innerText = item[2];
+		tripPrice[0].innerText = item[3];
+		tripPrice[1].innerText = item[4];
+
+		tripElementWrapper.appendChild(tripElement);
 	});
+
+	// if (prototypeElement.classList.contains("excursions__item--prototype")) {
+	// 	prototypeElement.style.display = "none";
+	// }
 };
