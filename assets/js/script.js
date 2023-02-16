@@ -3,9 +3,17 @@ const txt = `"1","Ogrodzieniec","Zamek Ogrodzieniec – ruiny zamku leżącego n
 
 // console.log(txt.split(/[\r\n]+/gm));
 
-const uploadFile = document.querySelector(".uploader__input");
+document.addEventListener("DOMContentLoaded", init);
 
-uploadFile.addEventListener("change", readFile);
+function init() {
+	const uploadFile = document.querySelector(".uploader__input");
+	const excursionsWrapper = document.querySelector(".excursions");
+	const orderSubmit = document.querySelector(".order");
+
+	uploadFile.addEventListener("change", readFile);
+	excursionsWrapper.addEventListener("submit", makeTripSummary);
+	orderSubmit.addEventListener("submit", submitOrder);
+}
 
 function readFile(e) {
 	const file = e.target.files[0];
@@ -18,7 +26,6 @@ function readFile(e) {
 			const contentSplit = content.split(/[\r\n]+/gm);
 
 			const trip = tripData(contentSplit);
-			console.log(trip);
 
 			createTripElement(trip);
 		};
@@ -37,28 +44,156 @@ const createTripElement = function (tripEl) {
 	const prototypeElement = document.querySelector(
 		".excursions__item--prototype"
 	);
-
-	console.log(prototypeElement);
 	const tripElementWrapper = document.querySelector(".panel__excursions");
 
 	tripEl.forEach(function (item) {
 		const tripElement = prototypeElement.cloneNode(true);
-		console.log(tripElement);
 		tripElement.classList.remove("excursions__item--prototype");
-
-		const tripTitle = document.querySelector(".excursions__title");
-		const tripDescription = document.querySelector(".excursions__description");
-		const tripPrice = document.querySelectorAll(".excursions__price");
-
-		tripTitle.innerText = item[1];
-		tripDescription.innerText = item[2];
-		tripPrice[0].innerText = item[3];
-		tripPrice[1].innerText = item[4];
-
+		implementTripData(tripElement, item);
 		tripElementWrapper.appendChild(tripElement);
 	});
 
-	// if (prototypeElement.classList.contains("excursions__item--prototype")) {
-	// 	prototypeElement.style.display = "none";
-	// }
+	if (prototypeElement.classList.contains("excursions__item--prototype")) {
+		prototypeElement.style.display = "none";
+	}
 };
+
+const implementTripData = function (tripEl, element) {
+	const tripTitle = tripEl.querySelector(".excursions__title");
+	const tripDescription = tripEl.querySelector(".excursions__description");
+	const tripPrice = tripEl.querySelectorAll(".excursions__price");
+	tripTitle.innerText = element[1];
+	tripDescription.innerText = element[2];
+	tripPrice[0].innerText = element[3];
+	tripPrice[1].innerText = element[4];
+};
+
+function makeTripSummary(e) {
+	e.preventDefault();
+
+	const singleTripEl = e.target.parentElement;
+	const title = singleTripEl.querySelector(".excursions__title");
+	const price = singleTripEl.querySelectorAll(".excursions__price");
+	const numberInputList = e.target.querySelectorAll(".excursions__field-input");
+
+	const adultsNumber = Number(e.target[0].value);
+	const childrenNumber = Number(e.target[1].value);
+
+	const basket = {
+		title: title.innerText,
+		adultNumber: adultsNumber,
+		adultPrice: price[0].innerText,
+		childNumber: childrenNumber,
+		childPrice: price[1].innerText,
+	};
+
+	let errors = [];
+	inputEvaluation(errors, adultsNumber, childrenNumber);
+
+	numberInputList.forEach(function (numberInput) {
+		numberInput.style.borderColor = "black";
+	});
+
+	if (errors.length > 0) {
+		errors.forEach(function (error) {
+			// error.style.borderColor = "red";
+			alert("Wpisz prawidłową liczbę osób");
+		});
+	} else {
+		addTripToSummary(basket);
+	}
+}
+
+const inputEvaluation = function (errorsArray, adultNr, childrenNr) {
+	if (Number.isNaN(Number(adultNr)) || Number.isNaN(Number(childrenNr))) {
+		errorsArray.push("To nie jest liczba");
+	}
+	if (adultNr < 0 || childrenNr < 0) {
+		errorsArray.push("Nieprawidłowa wartość");
+	}
+	if (adultNr === 0 && childrenNr === 0) {
+		errorsArray.push("Jedno pole jest wymagane");
+	}
+};
+
+let finalPrice = 0;
+
+const addTripToSummary = function (basketElement) {
+	const basketSummaryWrapper = document.querySelector(".panel__summary");
+	const basketSummaryTrip = createTripPrototype();
+
+	const tripTitle = basketSummaryTrip.querySelector(".summary__name");
+	const summaryTotalPrice = basketSummaryTrip.querySelector(
+		".summary__total-price"
+	);
+	const removeButton = basketSummaryTrip.querySelector(".summary__btn-remove");
+	const summaryPrices = basketSummaryTrip.querySelector(".summary__prices");
+
+	// if (basketSummaryPrototype.classList.contains("summary__item--prototype")) {
+	// basketSummaryPrototype.style.display = "none";
+
+	tripTitle.innerText = basketElement.title;
+	summaryTotalPrice.innerText =
+		basketElement.adultNumber * basketElement.adultPrice +
+		basketElement.childNumber * basketElement.childPrice +
+		" PLN";
+
+	summaryPrices.innerText =
+		"dorośli: " +
+		basketElement.adultNumber +
+		" x 99PLN, dzieci: " +
+		basketElement.childNumber +
+		" x 50PLN";
+
+	basketSummaryWrapper.appendChild(basketSummaryTrip);
+
+	addFinalPrice(basketElement);
+};
+
+const createTripPrototype = function () {
+	const basketSummaryWrapperEl = document.querySelector(".panel__summary");
+	const basketSummaryPrototype = basketSummaryWrapperEl.querySelector(
+		".summary__item--prototype"
+	);
+	const basketSummaryTripEl = basketSummaryPrototype.cloneNode(true);
+	basketSummaryTripEl.classList.remove("summary__item--prototype");
+	return basketSummaryTripEl;
+};
+
+const addFinalPrice = function (basketEl) {
+	const basketSummaryWrapperElement = document.querySelector(".panel__summary");
+	const tripsList =
+		basketSummaryWrapperElement.querySelectorAll(".summary__item");
+	const totalPrice = document.querySelector(".order__total-price-value");
+	console.log(totalPrice);
+
+	finalPrice +=
+		parseFloat(basketEl.adultNumber * basketEl.adultPrice) +
+		parseFloat(basketEl.childNumber * basketEl.childPrice);
+
+	totalPrice.innerText = finalPrice + "PLN";
+};
+
+function submitOrder(e) {
+	e.preventDefault();
+
+	console.log(e.target);
+	const inputList = e.target.querySelectorAll(".order__field-input");
+	const dataWrapper = e.target.querySelectorAll(".order__field-name");
+	const nameError = document.createElement("p");
+
+	dataWrapper[0].style.color = "black";
+
+	console.log(inputList[0]);
+
+	if (
+		inputList[0].value === "" ||
+		typeof parseFloat(inputList[0].value) !== "string"
+	) {
+		nameError.innerText = "Wpisz prawidłowe imię i nazwisko";
+		dataWrapper[0].appendChild(nameError);
+		dataWrapper[0].style.color = "red";
+	}
+
+	// dataWrapper.removeChild(nameError);
+}
