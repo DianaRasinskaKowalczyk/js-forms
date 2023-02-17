@@ -178,22 +178,42 @@ function submitOrder(e) {
 	e.preventDefault();
 
 	console.log(e.target);
-	const inputList = e.target.querySelectorAll(".order__field-input");
-	const dataWrapper = e.target.querySelectorAll(".order__field-name");
-	const nameError = document.createElement("p");
 
+	const inputList = e.target.querySelectorAll(".order__field-input");
+	const dataWrapper = e.target.querySelectorAll(".order__field");
+
+	const nameError = document.createElement("p");
+	const emailError = document.createElement("p");
+
+	console.log(dataWrapper[0]);
 	dataWrapper[0].style.color = "black";
+	dataWrapper[1].style.color = "black";
 
 	console.log(inputList[0]);
+	console.log(inputList[1]);
 
-	if (
-		inputList[0].value === "" ||
-		typeof parseFloat(inputList[0].value) !== "string"
-	) {
+	let errors = [];
+
+	if (inputList[0].value === "" || !Number.isNaN(Number(inputList[0].value))) {
 		nameError.innerText = "Wpisz prawidłowe imię i nazwisko";
 		dataWrapper[0].appendChild(nameError);
 		dataWrapper[0].style.color = "red";
+		errors.push("Podaj swoje imię i nazwisko");
 	}
 
-	// dataWrapper.removeChild(nameError);
+	if (inputList[1].value === "" || !inputList[1].value.includes("@")) {
+		emailError.innerText = "Adres email jest niepoprawny";
+		dataWrapper[1].appendChild(emailError);
+		dataWrapper[1].style.color = "red";
+		errors.push("Adres email jest niepoprawny");
+	}
+	console.log(dataWrapper[1]);
+	console.log(dataWrapper[2]);
+	console.log(errors);
+
+	// if (errors.length > 0) {
+	// 	errors.forEach(function (error) {
+
+	// 	});
+	// }
 }
