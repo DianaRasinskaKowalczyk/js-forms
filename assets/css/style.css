@@ -104,3 +104,11 @@ a {
 	color: palevioletred;
 	font-size: x-large;
 }
+
+.alertsList {
+	margin-left: 15px;
+	color: palevioletred;
+	font-size: small;
+	margin-left: 0;
+	margin-top: 10px;
+}
