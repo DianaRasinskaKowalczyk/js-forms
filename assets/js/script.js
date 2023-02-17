@@ -9,10 +9,14 @@ function init() {
 	const uploadFile = document.querySelector(".uploader__input");
 	const excursionsWrapper = document.querySelector(".excursions");
 	const orderSubmit = document.querySelector(".order");
+	const summaryItemList = document.querySelectorAll(".summary__item");
 
 	uploadFile.addEventListener("change", readFile);
 	excursionsWrapper.addEventListener("submit", makeTripSummary);
 	orderSubmit.addEventListener("submit", submitOrder);
+	summaryItemList.forEach(function (item) {
+		item.addEventListener("click", removeTrip);
+	});
 }
 
 function readFile(e) {
@@ -165,7 +169,6 @@ const addFinalPrice = function (basketEl) {
 	const tripsList =
 		basketSummaryWrapperElement.querySelectorAll(".summary__item");
 	const totalPrice = document.querySelector(".order__total-price-value");
-	console.log(totalPrice);
 
 	finalPrice +=
 		parseFloat(basketEl.adultNumber * basketEl.adultPrice) +
@@ -177,43 +180,80 @@ const addFinalPrice = function (basketEl) {
 function submitOrder(e) {
 	e.preventDefault();
 
-	console.log(e.target);
-
 	const inputList = e.target.querySelectorAll(".order__field-input");
-	const dataWrapper = e.target.querySelectorAll(".order__field");
-
-	const nameError = document.createElement("p");
-	const emailError = document.createElement("p");
-
-	console.log(dataWrapper[0]);
-	dataWrapper[0].style.color = "black";
-	dataWrapper[1].style.color = "black";
-
-	console.log(inputList[0]);
-	console.log(inputList[1]);
 
 	let errors = [];
 
-	if (inputList[0].value === "" || !Number.isNaN(Number(inputList[0].value))) {
-		nameError.innerText = "Wpisz prawidłowe imię i nazwisko";
-		dataWrapper[0].appendChild(nameError);
-		dataWrapper[0].style.color = "red";
-		errors.push("Podaj swoje imię i nazwisko");
+	const alertsList = document.querySelector(".alertsList");
+	alertsList.innerHTML = "";
+
+	validateOrderForm(inputList, errors);
+
+	if (errors.length === 0) {
+		const email = document.querySelector('[name="email"]').value;
+		const price = document.querySelector(
+			".order__total-price-value"
+		).textContent;
+		alert(
+			"Dziękujemy za złożenie zamówienia o wartości " +
+				price +
+				". Wszelkie szczegóły zamówienia zostały wysłane na adres email: " +
+				email +
+				" ."
+		);
+		resetForms();
+	} else {
+		errors.forEach(function (error) {
+			const errorLiEl = document.createElement("li");
+			errorLiEl.innerText = error;
+			errorLiEl.style.color = "red";
+			alertsList.appendChild(errorLiEl);
+		});
+	}
+}
+
+const validateOrderForm = function (inputListEl, errorsEl) {
+	if (
+		inputListEl[0].value === "" ||
+		!Number.isNaN(Number(inputListEl[0].value))
+	) {
+		errorsEl.push("Podaj swoje imię i nazwisko");
 	}
 
-	if (inputList[1].value === "" || !inputList[1].value.includes("@")) {
-		emailError.innerText = "Adres email jest niepoprawny";
-		dataWrapper[1].appendChild(emailError);
-		dataWrapper[1].style.color = "red";
-		errors.push("Adres email jest niepoprawny");
+	if (inputListEl[1].value === "" || !inputListEl[1].value.includes("@")) {
+		errorsEl.push("Adres email jest niepoprawny");
 	}
-	console.log(dataWrapper[1]);
-	console.log(dataWrapper[2]);
-	console.log(errors);
 
-	// if (errors.length > 0) {
-	// 	errors.forEach(function (error) {
+	if (finalPrice === 0) {
+		errorsEl.push("Wybierz wycieczkę");
+		alert("Wybierz wycieczkę");
+	}
+};
 
-	// 	});
-	// }
+const resetForms = function () {
+	const panelSummary = document.querySelector(".panel__summary");
+	while (panelSummary.children.length > 1) {
+		panelSummary.removeChild(panelSummary.lastElementChild);
+	}
+	const allForms = document.querySelectorAll("form");
+	allForms.forEach(function (form) {
+		form.reset();
+	});
+};
+
+function removeTrip(e) {
+	e.preventDefault();
+	const currentTrip = e.currentTarget;
+
+	const summaryTotalPrice = currentElement.querySelector(
+		".summary__total-price"
+	);
+	const summaryTotalPriceValue = document.querySelector(
+		".order__total-price-value"
+	);
+	const panelSummary = document.querySelector(".panel__summary");
+	finalPrice -= parseInt(summaryTotalPrice.innerText);
+	summaryTotalPriceValue.innerText = finalPrice + "PLN";
+
+	panelSummary.removeChild(currentTrip);
 }
