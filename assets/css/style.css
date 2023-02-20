@@ -112,3 +112,7 @@ a {
 	margin-left: 0;
 	margin-top: 10px;
 }
+
+.summary__item--prototype {
+	display: none;
+}

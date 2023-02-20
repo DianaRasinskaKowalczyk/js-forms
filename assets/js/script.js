@@ -9,12 +9,12 @@ function init() {
 	const uploadFile = document.querySelector(".uploader__input");
 	const excursionsWrapper = document.querySelector(".excursions");
 	const orderSubmit = document.querySelector(".order");
-	const summaryItemList = document.querySelectorAll(".summary__item");
+	const summaryList = document.querySelectorAll(".panel__summary");
 
 	uploadFile.addEventListener("change", readFile);
 	excursionsWrapper.addEventListener("submit", makeTripSummary);
 	orderSubmit.addEventListener("submit", submitOrder);
-	summaryItemList.forEach(function (item) {
+	summaryList.forEach(function (item) {
 		item.addEventListener("click", removeTrip);
 	});
 }
@@ -66,10 +66,12 @@ const implementTripData = function (tripEl, element) {
 	const tripTitle = tripEl.querySelector(".excursions__title");
 	const tripDescription = tripEl.querySelector(".excursions__description");
 	const tripPrice = tripEl.querySelectorAll(".excursions__price");
-	tripTitle.innerText = element[1];
-	tripDescription.innerText = element[2];
-	tripPrice[0].innerText = element[3];
-	tripPrice[1].innerText = element[4];
+
+	const [, title, description, priceFirst, priceSecond] = element;
+	tripTitle.innerText = title;
+	tripDescription.innerText = description;
+	tripPrice[0].innerText = priceFirst;
+	tripPrice[1].innerText = priceSecond;
 };
 
 function makeTripSummary(e) {
@@ -100,7 +102,6 @@ function makeTripSummary(e) {
 
 	if (errors.length > 0) {
 		errors.forEach(function (error) {
-			// error.style.borderColor = "red";
 			alert("Wpisz prawidłową liczbę osób");
 		});
 	} else {
@@ -133,9 +134,6 @@ const addTripToSummary = function (basketElement) {
 	const removeButton = basketSummaryTrip.querySelector(".summary__btn-remove");
 	const summaryPrices = basketSummaryTrip.querySelector(".summary__prices");
 
-	// if (basketSummaryPrototype.classList.contains("summary__item--prototype")) {
-	// basketSummaryPrototype.style.display = "none";
-
 	tripTitle.innerText = basketElement.title;
 	summaryTotalPrice.innerText =
 		basketElement.adultNumber * basketElement.adultPrice +
@@ -161,6 +159,9 @@ const createTripPrototype = function () {
 	);
 	const basketSummaryTripEl = basketSummaryPrototype.cloneNode(true);
 	basketSummaryTripEl.classList.remove("summary__item--prototype");
+	if (basketSummaryPrototype.classList.contains("summary__item--prototype")) {
+		basketSummaryPrototype.classList.remove = "summary__item--prototype";
+	}
 	return basketSummaryTripEl;
 };
 
@@ -243,17 +244,32 @@ const resetForms = function () {
 
 function removeTrip(e) {
 	e.preventDefault();
-	const currentTrip = e.currentTarget;
+	const currentTrip = e.target;
+	const panelSummary = e.currentTarget;
 
-	const summaryTotalPrice = currentElement.querySelector(
+	const summaryTotalPrice = currentTrip.parentElement.querySelector(
 		".summary__total-price"
 	);
+	const summaryItem = e.target.parentElement.parentElement;
 	const summaryTotalPriceValue = document.querySelector(
 		".order__total-price-value"
 	);
-	const panelSummary = document.querySelector(".panel__summary");
-	finalPrice -= parseInt(summaryTotalPrice.innerText);
-	summaryTotalPriceValue.innerText = finalPrice + "PLN";
 
-	panelSummary.removeChild(currentTrip);
+	panelSummary.removeChild(summaryItem);
+	updateTotalPrice();
+}
+
+function updateTotalPrice() {
+	const summaryContainer = document.querySelector(".summary");
+	const summaryPricesList = summaryContainer.querySelectorAll(
+		".summary__total-price"
+	);
+	const totalPrice = document.querySelector(".order__total-price-value");
+	let total = 0;
+	summaryPricesList.forEach(price => {
+		total += Number(price.innerText.replace("PLN", ""));
+	});
+
+	const sum = total - 199;
+	totalPrice.innerText = sum + " PLN";
 }
