@@ -67,11 +67,14 @@ const implementTripData = function (tripEl, element) {
 	const tripDescription = tripEl.querySelector(".excursions__description");
 	const tripPrice = tripEl.querySelectorAll(".excursions__price");
 
-	const [, title, description, priceFirst, priceSecond] = element;
+	const [, title, description, priceAdult, priceChildren] = element;
 	tripTitle.innerText = title;
 	tripDescription.innerText = description;
-	tripPrice[0].innerText = priceFirst;
-	tripPrice[1].innerText = priceSecond;
+
+	const [adultEl, childEl] = tripPrice;
+
+	adultEl.innerText = priceAdult;
+	childEl.innerText = priceChildren;
 };
 
 function makeTripSummary(e) {
@@ -264,12 +267,15 @@ function updateTotalPrice() {
 	const summaryPricesList = summaryContainer.querySelectorAll(
 		".summary__total-price"
 	);
+	const summaryPricePrototype = summaryContainer.querySelector(
+		".summary__total-price"
+	);
 	const totalPrice = document.querySelector(".order__total-price-value");
 	let total = 0;
 	summaryPricesList.forEach(price => {
 		total += Number(price.innerText.replace("PLN", ""));
 	});
 
-	const sum = total - 199;
+	const sum = total - summaryPricePrototype.innerText.replace("PLN", "");
 	totalPrice.innerText = sum + " PLN";
 }
